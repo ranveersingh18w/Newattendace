@@ -1,40 +1,15 @@
-// API Configuration
-const API_BASE_URL = 'http://103.159.68.35:3536/api';
-const SIGNATURE_KEY = '6ECD762D4776742AFFB192CE8A148';
+// API Configuration - Now using secure backend proxy
+const API_BASE_URL = '/api'; // Serverless functions will handle API calls
 
-// Crypto utilities for HMAC signature
-async function generateSignature() {
-    const timestamp = Date.now().toString();
-    const encoder = new TextEncoder();
-    const keyData = encoder.encode(SIGNATURE_KEY);
-    const messageData = encoder.encode(timestamp);
-    
-    const cryptoKey = await crypto.subtle.importKey(
-        'raw',
-        keyData,
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign']
-    );
-    
-    const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
-    const hashArray = Array.from(new Uint8Array(signature));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    return `${timestamp}.${hashHex}`;
-}
-
-// API Client
+// API Client - Refactored to use backend proxy
 class ApiClient {
     constructor() {
         this.token = null;
     }
 
     async request(method, path, options = {}) {
-        const signature = await generateSignature();
         const headers = {
             'Accept': 'application/json',
-            'X-App-Signature': signature,
             ...options.headers
         };
 
@@ -60,15 +35,21 @@ class ApiClient {
         const response = await fetch(url, config);
         
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API Error (${response.status}): ${errorText}`);
+            let errorMessage = 'Request failed';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch {
+                errorMessage = await response.text() || errorMessage;
+            }
+            throw new Error(`API Error (${response.status}): ${errorMessage}`);
         }
 
         return response.json();
     }
 
     async login(rollNumber, email, password) {
-        const data = await this.request('POST', '/student/auth/login', {
+        const data = await this.request('POST', '/login', {
             body: { rollNumber, email, password }
         });
         
@@ -81,11 +62,11 @@ class ApiClient {
     }
 
     async getAttendanceStats() {
-        return this.request('GET', '/student/dashboard/attendance/stats');
+        return this.request('GET', '/stats');
     }
 
     async getAttendanceRecords(page = 1, limit = 100) {
-        return this.request('GET', `/student/dashboard/attendance/records?page=${page}&limit=${limit}`);
+        return this.request('GET', `/records?page=${page}&limit=${limit}`);
     }
 
     async getAllAttendanceRecords() {
@@ -301,7 +282,7 @@ async function loadRecords() {
 function renderRecords() {
     if (state.records.length === 0) {
         elements.recordsContent.innerHTML = `
-            <tr><td colspan="5" class="text-center py-8 text-gray-600">No records found</td></tr>
+            <tr><td colspan="5" class="text-center py-8 text-gray-600 text-sm">No records found</td></tr>
         `;
         return;
     }
@@ -321,15 +302,17 @@ function renderRecords() {
         
         return `
             <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm text-gray-900">${dateStr}</td>
-                <td class="px-4 py-3 text-sm text-gray-600">${timeStr}</td>
-                <td class="px-4 py-3 text-sm text-gray-900">${courseName}</td>
-                <td class="px-4 py-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 whitespace-nowrap">${dateStr}</td>
+                <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-600 whitespace-nowrap">${timeStr}</td>
+                <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900">
+                    <div class="max-w-xs truncate" title="${courseName}">${courseName}</div>
+                </td>
+                <td class="px-2 sm:px-4 py-2 sm:py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusClass} whitespace-nowrap">
                         ${statusIcon} ${status.charAt(0) + status.slice(1).toLowerCase()}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-600">${teacher}</td>
+                <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-600 hidden sm:table-cell">${teacher}</td>
             </tr>
         `;
     }).join('');

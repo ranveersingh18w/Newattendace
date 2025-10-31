@@ -1,0 +1,19 @@
+{
+  "name": "techno-njr-attendance",
+  "version": "1.0.0",
+  "description": "Techno NJR Attendance Portal - Secure student attendance tracking system",
+  "main": "app.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": [
+    "attendance",
+    "student",
+    "portal"
+  ],
+  "author": "",
+  "license": "MIT"
+}
