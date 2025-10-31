@@ -27,7 +27,30 @@ module.exports = async (req, res) => {
     }
     
     try {
-        const { rollNumber, email, password } = req.body;
+        let body = req.body;
+
+        if (!body || typeof body === 'string') {
+            let rawBody = typeof body === 'string' ? body : '';
+
+            if (!rawBody) {
+                for await (const chunk of req) {
+                    rawBody += chunk;
+                }
+            }
+
+            if (rawBody) {
+                try {
+                    body = JSON.parse(rawBody);
+                } catch (parseError) {
+                    console.error('Invalid JSON body:', rawBody, parseError);
+                    return res.status(400).json({ error: 'Invalid JSON payload' });
+                }
+            } else {
+                body = {};
+            }
+        }
+
+        const { rollNumber, email, password } = body;
         
         if (!rollNumber || !email || !password) {
             return res.status(400).json({ error: 'Missing required fields' });

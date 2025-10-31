@@ -1,28 +1,56 @@
-// API Configuration// API Configuration// API Configuration - Now using secure backend proxy
+const API_BASE_URL = '/api';// API Configuration// API Configuration// API Configuration - Now using secure backend proxy
 
-const API_BASE_URL = '/api';
 
-const API_BASE_URL = '/api';const API_BASE_URL = '/api'; // Serverless functions will handle API calls
 
-// API Client
+function calculate75Status(attended, total) {const API_BASE_URL = '/api';
 
-class ApiClient {
+    const current = total > 0 ? (attended / total) * 100 : 0;
+
+    const target = 75;const API_BASE_URL = '/api';const API_BASE_URL = '/api'; // Serverless functions will handle API calls
+
+
+
+    if (current >= target) {// API Client
+
+        let canMiss = 0;
+
+        while (((attended / (total + canMiss + 1)) * 100) >= target) {class ApiClient {
+
+            canMiss++;
+
+        }    constructor() {
+
+        return { above75: true, value: canMiss, label: 'Can Miss', desc: 'classes you can skip' };
+
+    }        this.token = null;// Helper function to calculate classes needed for 75%// API Client - Refactored to use backend proxy
+
+
+
+    const needed = Math.ceil((target * total - attended) / (100 - target));    }
+
+    return { above75: false, value: Math.max(0, needed), label: 'Need', desc: 'classes to reach 75%' };
+
+}function calculate75Status(attended, total) {class ApiClient {
+
+
+
+class ApiClient {    async request(method, path, options = {}) {
 
     constructor() {
 
-        this.token = null;// Helper function to calculate classes needed for 75%// API Client - Refactored to use backend proxy
+        this.token = null;        const headers = {    const current = total > 0 ? (attended / total) * 100 : 0;    constructor() {
 
     }
 
-function calculate75Status(attended, total) {class ApiClient {
+            'Accept': 'application/json',
 
     async request(method, path, options = {}) {
 
-        const headers = {    const current = total > 0 ? (attended / total) * 100 : 0;    constructor() {
+        const headers = {            ...options.headers    const target = 75;        this.token = null;
 
-            'Accept': 'application/json',
+            Accept: 'application/json',
 
-            ...options.headers    const target = 75;        this.token = null;
+            ...(options.headers || {})        };
 
         };
 
@@ -30,509 +58,1017 @@ function calculate75Status(attended, total) {class ApiClient {
 
         if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
 
+            headers['Content-Type'] = 'application/json';        if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
+
+        }
+
             headers['Content-Type'] = 'application/json';    if (current >= target) {
+
+        if (this.token) {
+
+            headers.Authorization = `Bearer ${this.token}`;        }
 
         }
 
         // Can miss classes    async request(method, path, options = {}) {
 
-        if (this.token) {
+        const config = {
 
-            headers['Authorization'] = `Bearer ${this.token}`;        let canMiss = 0;        const headers = {
+            method,        if (this.token) {
+
+            headers,
+
+            ...options            headers['Authorization'] = `Bearer ${this.token}`;        let canMiss = 0;        const headers = {
+
+        };
 
         }
 
-        while (((attended / (total + canMiss + 1)) * 100) >= target) {            'Accept': 'application/json',
+        if (options.body && typeof options.body !== 'string') {
+
+            config.body = JSON.stringify(options.body);        while (((attended / (total + canMiss + 1)) * 100) >= target) {            'Accept': 'application/json',
+
+        }
 
         const url = `${API_BASE_URL}${path}`;
 
+        const response = await fetch(`${API_BASE_URL}${path}`, config);
+
         const config = {            canMiss++;            ...options.headers
 
-            method,
+        if (!response.ok) {
 
-            headers,        }        };
+            let message = `Request failed with status ${response.status}`;            method,
 
-            ...options
+            try {
 
-        };        return { above75: true, value: canMiss, label: "Can Miss", desc: "absences allowed" };
+                const data = await response.json();            headers,        }        };
 
+                message = data.error || data.message || message;
 
-
-        if (options.body) {    } else {        if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
-
-            config.body = JSON.stringify(options.body);
-
-        }        // Need to attend            headers['Content-Type'] = 'application/json';
-
-
-
-        try {        const needed = Math.ceil((target * total - attended) / (100 - target));        }
-
-            const response = await fetch(url, config);
-
-                    return { above75: false, value: Math.max(0, needed), label: "Need", desc: "to reach 75%" };
-
-            if (!response.ok) {
-
-                let errorMessage = `Request failed with status ${response.status}`;    }        if (this.token) {
+            } catch (error) {            ...options
 
                 try {
 
-                    const errorData = await response.json();}            headers['Authorization'] = `Bearer ${this.token}`;
+                    message = await response.text();        };        return { above75: true, value: canMiss, label: "Can Miss", desc: "absences allowed" };
 
-                    errorMessage = errorData.error || errorData.message || errorMessage;
+                } catch (_) {
 
-                } catch (jsonError) {        }
+                    // keep default message
 
-                    try {
+                }
 
-                        errorMessage = await response.text() || errorMessage;// API Client
+            }        if (options.body) {    } else {        if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
 
-                    } catch (textError) {
+            throw new Error(message);
 
-                        // Use default error messageclass ApiClient {        const url = `${API_BASE_URL}${path}`;
-
-                    }
-
-                }    constructor() {        const config = {
-
-                throw new Error(errorMessage);
-
-            }        this.token = null;            method,
+        }            config.body = JSON.stringify(options.body);
 
 
 
-            return response.json();    }            headers,
-
-        } catch (error) {
-
-            // Re-throw with a cleaner message            ...options
-
-            throw new Error(error.message || 'Network request failed');
-
-        }    async request(method, path, options = {}) {        };
+        return response.json();        }        // Need to attend            headers['Content-Type'] = 'application/json';
 
     }
 
-        const headers = { 'Accept': 'application/json', ...options.headers };
+
 
     async login(rollNumber, email, password) {
 
-        const data = await this.request('POST', '/login', {                if (options.body) {
+        const data = await this.request('POST', '/login', {        try {        const needed = Math.ceil((target * total - attended) / (100 - target));        }
 
             body: { rollNumber, email, password }
 
-        });        if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {            config.body = JSON.stringify(options.body);
+        });            const response = await fetch(url, config);
 
-        
 
-        if (!data.token) {            headers['Content-Type'] = 'application/json';        }
 
-            throw new Error('No token received from API');
+        if (!data.token) {                    return { above75: false, value: Math.max(0, needed), label: "Need", desc: "to reach 75%" };
 
-        }        }
+            throw new Error('Invalid response from authentication service');
 
-        
+        }            if (!response.ok) {
 
-        this.token = data.token;                try {
+
+
+        this.token = data.token;                let errorMessage = `Request failed with status ${response.status}`;    }        if (this.token) {
 
         return data.student;
 
-    }        if (this.token) {            const response = await fetch(url, config);
+    }                try {
 
 
 
-    async getStats() {            headers['Authorization'] = `Bearer ${this.token}`;            
+    getStats() {                    const errorData = await response.json();}            headers['Authorization'] = `Bearer ${this.token}`;
 
         return this.request('GET', '/stats');
 
-    }        }            if (!response.ok) {
+    }                    errorMessage = errorData.error || errorData.message || errorMessage;
 
 
 
-    async getRecords(page = 1, limit = 100) {                let errorMessage = `Request failed with status ${response.status}`;
+    getRecords(page = 1, limit = 100) {                } catch (jsonError) {        }
 
         return this.request('GET', `/records?page=${page}&limit=${limit}`);
 
-    }        const response = await fetch(`${API_BASE_URL}${path}`, {                try {
+    }                    try {
 
 
 
-    async getAllRecords() {            method,                    const errorData = await response.json();
+    async getAllRecords() {                        errorMessage = await response.text() || errorMessage;// API Client
 
         const records = [];
 
-        let page = 1;            headers,                    errorMessage = errorData.error || errorData.message || errorMessage;
+        let page = 1;                    } catch (textError) {
 
-        let hasMore = true;
+        let hasNext = true;
 
-            ...(options.body && { body: JSON.stringify(options.body) })                } catch (jsonError) {
+                        // Use default error messageclass ApiClient {        const url = `${API_BASE_URL}${path}`;
 
-        while (hasMore && page < 10) {
+        while (hasNext && page <= 10) {
 
-            const data = await this.getRecords(page, 100);        });                    try {
+            const data = await this.getRecords(page, 100);                    }
 
             records.push(...(data.records || []));
 
-            hasMore = data.pagination?.hasNextPage || false;                        errorMessage = await response.text() || errorMessage;
+            hasNext = data.pagination?.hasNextPage || false;                }    constructor() {        const config = {
 
-            page++;
+            page += 1;
 
-        }        if (!response.ok) {                    } catch (textError) {
+        }                throw new Error(errorMessage);
 
 
 
-        return records;            let errorMessage = `Error ${response.status}`;                        // Use default error message
+        return records;            }        this.token = null;            method,
 
     }
 
-}            try {                    }
+}
 
 
 
-// State Management                const data = await response.json();                }
+const state = {            return response.json();    }            headers,
 
-const state = {
+    client: new ApiClient(),
 
-    client: new ApiClient(),                errorMessage = data.error || data.message || errorMessage;                throw new Error(errorMessage);
+    student: null,        } catch (error) {
 
-    student: null,
+    stats: null,
 
-    stats: null,            } catch {}            }
+    records: [],            // Re-throw with a cleaner message            ...options
 
-    records: []
+    chart: null
 
-};            throw new Error(errorMessage);
+};            throw new Error(error.message || 'Network request failed');
 
 
 
-// DOM Elements        }            return response.json();
+const elements = {        }    async request(method, path, options = {}) {        };
 
-const elements = {
+    loginScreen: document.getElementById('loginScreen'),
 
-    loginScreen: document.getElementById('loginScreen'),        } catch (error) {
+    dashboardScreen: document.getElementById('dashboardScreen'),    }
 
-    dashboardScreen: document.getElementById('dashboardScreen'),
+    loginForm: document.getElementById('loginForm'),
 
-    loginForm: document.getElementById('loginForm'),        return response.json();            // Re-throw with a cleaner message
+    loginError: document.getElementById('loginError'),        const headers = { 'Accept': 'application/json', ...options.headers };
 
-    loginError: document.getElementById('loginError'),
+    loginBtn: document.getElementById('loginBtn'),
 
-    loginBtn: document.getElementById('loginBtn'),    }            throw new Error(error.message || 'Network request failed');
+    logoutBtn: document.getElementById('logoutBtn'),    async login(rollNumber, email, password) {
 
-    logoutBtn: document.getElementById('logoutBtn'),
+    studentName: document.getElementById('studentName'),
 
-    studentName: document.getElementById('studentName'),        }
+    studentRoll: document.getElementById('studentRoll'),        const data = await this.request('POST', '/login', {                if (options.body) {
 
-    studentRoll: document.getElementById('studentRoll'),
+    profileAvatar: document.getElementById('profileAvatar'),
 
-    overallPercentage: document.getElementById('overallPercentage'),    async login(rollNumber, email, password) {    }
+    overallPercentage: document.getElementById('overallPercentage'),            body: { rollNumber, email, password }
 
     classesAttended: document.getElementById('classesAttended'),
 
-    totalClasses: document.getElementById('totalClasses'),        const data = await this.request('POST', '/login', {
+    totalClasses: document.getElementById('totalClasses'),        });        if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {            config.body = JSON.stringify(options.body);
 
-    activeCourses: document.getElementById('activeCourses'),
+    attendanceStatus: document.getElementById('attendanceStatus'),
 
-    rtuContent: document.getElementById('rtuContent'),            body: { rollNumber, email, password }    async login(rollNumber, email, password) {
+    statusLabel: document.getElementById('statusLabel'),        
 
-    labContent: document.getElementById('labContent'),
+    statusDescription: document.getElementById('statusDescription'),
 
-    recordsContent: document.getElementById('recordsContent'),        });        const data = await this.request('POST', '/login', {
+    activeCourses: document.getElementById('activeCourses'),        if (!data.token) {            headers['Content-Type'] = 'application/json';        }
 
-    recordsLoading: document.getElementById('recordsLoading')
+    rtuContent: document.getElementById('rtuContent'),
 
-};        this.token = data.token;            body: { rollNumber, email, password }
+    labContent: document.getElementById('labContent'),            throw new Error('No token received from API');
 
+    recordsContent: document.getElementById('recordsContent'),
 
+    recordsLoading: document.getElementById('recordsLoading'),        }        }
 
-// Helper function to get element by ID        return data.student;        });
+    calendarTitle: document.getElementById('calendarTitle'),
 
-const $ = (id) => document.getElementById(id);
+    calendarDays: document.getElementById('calendarDays')        
 
-    }        
+};
 
-// Event: Login Form Submit
+        this.token = data.token;                try {
 
-elements.loginForm.addEventListener('submit', async (e) => {        if (!data.token) {
+const query = (selector) => Array.from(document.querySelectorAll(selector));
 
-    e.preventDefault();
-
-        async getStats() {            throw new Error('No token received from API');
-
-    const rollNumber = document.getElementById('rollNumber').value.trim();
-
-    const email = document.getElementById('email').value.trim();        return this.request('GET', '/stats');        }
-
-    const password = document.getElementById('password').value;
-
-        }        
-
-    elements.loginBtn.disabled = true;
-
-    elements.loginBtn.textContent = 'Logging in...';        this.token = data.token;
-
-    elements.loginError.classList.add('hidden');
-
-        async getRecords(page = 1, limit = 100) {        return data.student;
-
-    try {
-
-        console.log('Attempting login with:', { rollNumber, email });        return this.request('GET', `/records?page=${page}&limit=${limit}`);    }
-
-        const student = await state.client.login(rollNumber, email, password);
-
-        state.student = student;    }
-
-        
-
-        // Store credentials in session    async getAttendanceStats() {
-
-        sessionStorage.setItem('credentials', JSON.stringify({ rollNumber, email, password }));
-
-            async getAllRecords() {        return this.request('GET', '/stats');
-
-        showDashboard();
-
-        await loadDashboardData();        const all = [];    }
-
-    } catch (error) {
-
-        console.error('Login error:', error);        let page = 1;
-
-        const errorMessage = error.message || 'Login failed. Please check your credentials.';
-
-        elements.loginError.textContent = errorMessage;        let hasMore = true;    async getAttendanceRecords(page = 1, limit = 100) {
-
-        elements.loginError.classList.remove('hidden');
-
-    } finally {        return this.request('GET', `/records?page=${page}&limit=${limit}`);
-
-        elements.loginBtn.disabled = false;
-
-        elements.loginBtn.textContent = 'Login';        while (hasMore && page < 10) {    }
-
-    }
-
-});            const data = await this.getRecords(page, 100);
-
-
-
-// Event: Logout Button            all.push(...(data.records || []));    async getAllAttendanceRecords() {
-
-elements.logoutBtn.addEventListener('click', () => {
-
-    sessionStorage.removeItem('credentials');            hasMore = data.pagination?.hasNextPage || false;        const records = [];
-
-    state.client.token = null;
-
-    state.student = null;            page++;        let page = 1;
-
-    state.stats = null;
-
-    state.records = [];        }        let hasMore = true;
-
-    
-
-    elements.loginScreen.classList.remove('hidden');
-
-    elements.dashboardScreen.classList.add('hidden');
-
-    elements.loginForm.reset();        return all;        while (hasMore) {
-
-});
-
-    }            const data = await this.getAttendanceRecords(page, 100);
-
-// Event: Tab Switching
-
-document.querySelectorAll('.tab-btn').forEach(btn => {}            records.push(...(data.records || []));
-
-    btn.addEventListener('click', () => {
-
-        const targetTab = btn.dataset.tab;            hasMore = data.pagination?.hasNextPage || false;
-
-        
-
-        // Update button states// State            page++;
-
-        document.querySelectorAll('.tab-btn').forEach(b => {
-
-            b.classList.remove('tab-active');const state = {        }
-
-            b.classList.add('text-gray-600', 'hover:text-gray-900');
-
-        });    client: new ApiClient(),
-
-        btn.classList.add('tab-active');
-
-        btn.classList.remove('text-gray-600', 'hover:text-gray-900');    student: null,        return records;
-
-        
-
-        // Update tab content    stats: null,    }
-
-        document.querySelectorAll('.tab-content').forEach(content => {
-
-            content.classList.add('hidden');    records: [],}
-
-        });
-
-            chart: null
-
-        if (targetTab === 'rtu') {
-
-            document.getElementById('rtuTab').classList.remove('hidden');};// UI State Management
-
-        } else if (targetTab === 'lab') {
-
-            document.getElementById('labTab').classList.remove('hidden');const state = {
-
-        } else if (targetTab === 'records') {
-
-            document.getElementById('recordsTab').classList.remove('hidden');// DOM    client: new ApiClient(),
-
-            if (state.records.length === 0) {
-
-                loadRecords();const $ = (id) => document.getElementById(id);    student: null,
-
-            }
-
-        }    stats: null,
-
-    });
-
-});// Event: Login    records: []
-
-
-
-// UI Functions$('loginForm').addEventListener('submit', async (e) => {};
+        return data.student;
 
 function showDashboard() {
 
-    elements.loginScreen.classList.add('hidden');    e.preventDefault();
+    elements.loginScreen.classList.add('hidden');    }        if (this.token) {            const response = await fetch(url, config);
 
     elements.dashboardScreen.classList.remove('hidden');
 
-        // DOM Elements
+
 
     if (state.student) {
 
-        elements.studentName.textContent = `Welcome, ${state.student.name || 'Student'}`;    const btn = $('loginBtn');const elements = {
+        elements.studentName.textContent = `Welcome, ${state.student.name || 'Student'}`;    async getStats() {            headers['Authorization'] = `Bearer ${this.token}`;            
 
         elements.studentRoll.textContent = state.student.rollNumber || '';
 
-            const error = $('loginError');    loginScreen: document.getElementById('loginScreen'),
+        return this.request('GET', '/stats');
 
-        // Update profile avatar if element exists
+        if (elements.profileAvatar) {
 
-        const avatar = $('profileAvatar');    const rollNumber = $('rollNumber').value.trim();    dashboardScreen: document.getElementById('dashboardScreen'),
-
-        if (avatar) {
-
-            avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.student.name || 'S')}&background=667eea&color=fff&size=128`;    const email = $('email').value.trim();    loginForm: document.getElementById('loginForm'),
+            elements.profileAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.student.name || 'S')}&background=667eea&color=fff&size=128`;    }        }            if (!response.ok) {
 
         }
 
-    }    const password = $('password').value;    loginError: document.getElementById('loginError'),
+    }
 
 }
 
-        loginBtn: document.getElementById('loginBtn'),
+    async getRecords(page = 1, limit = 100) {                let errorMessage = `Request failed with status ${response.status}`;
 
-async function loadDashboardData() {
+function showLogin(errorMessage) {
 
-    try {    btn.disabled = true;    logoutBtn: document.getElementById('logoutBtn'),
+    elements.dashboardScreen.classList.add('hidden');        return this.request('GET', `/records?page=${page}&limit=${limit}`);
 
-        state.stats = await state.client.getStats();
+    elements.loginScreen.classList.remove('hidden');
 
-        renderOverview();    btn.textContent = 'Logging in...';    studentName: document.getElementById('studentName'),
+    }        const response = await fetch(`${API_BASE_URL}${path}`, {                try {
 
-        renderPerformance();
+    if (errorMessage) {
 
-    } catch (error) {    error.classList.add('hidden');    studentRoll: document.getElementById('studentRoll'),
+        elements.loginError.textContent = errorMessage;
 
-        console.error('Failed to load dashboard data:', error);
+        elements.loginError.classList.remove('hidden');
 
-        alert('Failed to load attendance data. Please try again.');        overallPercentage: document.getElementById('overallPercentage'),
+    } else {    async getAllRecords() {            method,                    const errorData = await response.json();
+
+        elements.loginError.classList.add('hidden');
+
+    }        const records = [];
+
+}
+
+        let page = 1;            headers,                    errorMessage = errorData.error || errorData.message || errorMessage;
+
+async function handleLogin(event) {
+
+    event.preventDefault();        let hasMore = true;
+
+
+
+    const rollNumber = document.getElementById('rollNumber').value.trim();            ...(options.body && { body: JSON.stringify(options.body) })                } catch (jsonError) {
+
+    const email = document.getElementById('email').value.trim();
+
+    const password = document.getElementById('password').value;        while (hasMore && page < 10) {
+
+
+
+    elements.loginBtn.disabled = true;            const data = await this.getRecords(page, 100);        });                    try {
+
+    elements.loginBtn.textContent = 'Logging in...';
+
+    elements.loginError.classList.add('hidden');            records.push(...(data.records || []));
+
+
+
+    try {            hasMore = data.pagination?.hasNextPage || false;                        errorMessage = await response.text() || errorMessage;
+
+        state.student = await state.client.login(rollNumber, email, password);
+
+        sessionStorage.setItem('credentials', JSON.stringify({ rollNumber, email, password }));            page++;
+
+
+
+        showDashboard();        }        if (!response.ok) {                    } catch (textError) {
+
+        await loadData();
+
+    } catch (error) {
+
+        console.error('Login failed:', error);
+
+        const message = error.message || 'Login failed. Please check your credentials and try again.';        return records;            let errorMessage = `Error ${response.status}`;                        // Use default error message
+
+        elements.loginError.textContent = message;
+
+        elements.loginError.classList.remove('hidden');    }
+
+    } finally {
+
+        elements.loginBtn.disabled = false;}            try {                    }
+
+        elements.loginBtn.textContent = 'Login';
 
     }
 
-}    try {    classesAttended: document.getElementById('classesAttended'),
+}
+
+// State Management                const data = await response.json();                }
+
+function handleLogout() {
+
+    sessionStorage.removeItem('credentials');const state = {
+
+    localStorage.removeItem('stats');
+
+    localStorage.removeItem('records');    client: new ApiClient(),                errorMessage = data.error || data.message || errorMessage;                throw new Error(errorMessage);
 
 
 
-function renderOverview() {        state.student = await state.client.login(rollNumber, email, password);    totalClasses: document.getElementById('totalClasses'),
+    state.client.token = null;    student: null,
 
-    const overall = state.stats?.overall || {};
+    state.student = null;
 
-    const courses = state.stats?.byCourse || [];        sessionStorage.setItem('credentials', JSON.stringify({ rollNumber, email, password }));    activeCourses: document.getElementById('activeCourses'),
+    state.stats = null;    stats: null,            } catch {}            }
 
-    
+    state.records = [];
 
-    elements.overallPercentage.textContent = `${(overall.percentage || 0).toFixed(1)}%`;            rtuContent: document.getElementById('rtuContent'),
+    records: []
 
-    elements.classesAttended.textContent = overall.attendedClasses || 0;
+    elements.loginForm.reset();
 
-    elements.totalClasses.textContent = overall.totalClasses || 0;        showDashboard();    labContent: document.getElementById('labContent'),
-
-    elements.activeCourses.textContent = courses.length || 0;
-
-}        await loadData();    recordsContent: document.getElementById('recordsContent'),
-
-
-
-function renderPerformance() {    } catch (err) {    recordsLoading: document.getElementById('recordsLoading')
-
-    const courses = state.stats?.byCourse || [];
-
-    const rtuCourses = courses.filter(c => c.classType === 'RTU_CLASSES');        error.textContent = err.message || 'Login failed';};
-
-    const labCourses = courses.filter(c => c.classType === 'LABS');
-
-            error.classList.remove('hidden');
-
-    elements.rtuContent.innerHTML = renderCourseList(rtuCourses);
-
-    elements.labContent.innerHTML = renderCourseList(labCourses);    } finally {// Event Handlers
+    showLogin();};            throw new Error(errorMessage);
 
 }
 
-        btn.disabled = false;elements.loginForm.addEventListener('submit', async (e) => {
+
+
+function bindEvents() {
+
+    elements.loginForm.addEventListener('submit', handleLogin);// DOM Elements        }            return response.json();
+
+    elements.logoutBtn.addEventListener('click', handleLogout);
+
+const elements = {
+
+    query('.tab-btn').forEach((button) => {
+
+        button.addEventListener('click', () => {    loginScreen: document.getElementById('loginScreen'),        } catch (error) {
+
+            const targetTab = button.dataset.tab;
+
+    dashboardScreen: document.getElementById('dashboardScreen'),
+
+            query('.tab-btn').forEach((btn) => {
+
+                btn.classList.remove('tab-active');    loginForm: document.getElementById('loginForm'),        return response.json();            // Re-throw with a cleaner message
+
+                btn.classList.add('text-gray-600', 'hover:text-gray-900');
+
+            });    loginError: document.getElementById('loginError'),
+
+
+
+            button.classList.add('tab-active');    loginBtn: document.getElementById('loginBtn'),    }            throw new Error(error.message || 'Network request failed');
+
+            button.classList.remove('text-gray-600', 'hover:text-gray-900');
+
+    logoutBtn: document.getElementById('logoutBtn'),
+
+            query('.tab-content').forEach((content) => content.classList.add('hidden'));
+
+            document.getElementById(`${targetTab}Tab`).classList.remove('hidden');    studentName: document.getElementById('studentName'),        }
+
+
+
+            if (targetTab === 'records' && state.records.length === 0) {    studentRoll: document.getElementById('studentRoll'),
+
+                loadRecords();
+
+            }    overallPercentage: document.getElementById('overallPercentage'),    async login(rollNumber, email, password) {    }
+
+        });
+
+    });    classesAttended: document.getElementById('classesAttended'),
+
+}
+
+    totalClasses: document.getElementById('totalClasses'),        const data = await this.request('POST', '/login', {
+
+async function loadData() {
+
+    try {    activeCourses: document.getElementById('activeCourses'),
+
+        elements.recordsLoading.classList.remove('hidden');
+
+    rtuContent: document.getElementById('rtuContent'),            body: { rollNumber, email, password }    async login(rollNumber, email, password) {
+
+        const [stats, records] = await Promise.all([
+
+            state.client.getStats(),    labContent: document.getElementById('labContent'),
+
+            state.client.getAllRecords()
+
+        ]);    recordsContent: document.getElementById('recordsContent'),        });        const data = await this.request('POST', '/login', {
+
+
+
+        state.stats = stats;    recordsLoading: document.getElementById('recordsLoading')
+
+        state.records = records;
+
+};        this.token = data.token;            body: { rollNumber, email, password }
+
+        localStorage.setItem('stats', JSON.stringify(stats));
+
+        localStorage.setItem('records', JSON.stringify(records));
+
+
+
+        renderAll();// Helper function to get element by ID        return data.student;        });
+
+    } catch (error) {
+
+        console.error('Failed to load dashboard data:', error);const $ = (id) => document.getElementById(id);
+
+        alert('Failed to load attendance data. Please try again in a moment.');
+
+    } finally {    }        
+
+        elements.recordsLoading.classList.add('hidden');
+
+    }// Event: Login Form Submit
+
+}
+
+elements.loginForm.addEventListener('submit', async (e) => {        if (!data.token) {
+
+async function loadRecords() {
+
+    try {    e.preventDefault();
+
+        elements.recordsLoading.classList.remove('hidden');
+
+        state.records = await state.client.getAllRecords();        async getStats() {            throw new Error('No token received from API');
+
+        localStorage.setItem('records', JSON.stringify(state.records));
+
+        renderRecords();    const rollNumber = document.getElementById('rollNumber').value.trim();
+
+    } catch (error) {
+
+        console.error('Failed to load records:', error);    const email = document.getElementById('email').value.trim();        return this.request('GET', '/stats');        }
+
+        elements.recordsContent.innerHTML = `
+
+            <tr><td colspan="5" class="text-center py-8 text-red-600">Failed to load records</td></tr>    const password = document.getElementById('password').value;
+
+        `;
+
+    } finally {        }        
+
+        elements.recordsLoading.classList.add('hidden');
+
+    }    elements.loginBtn.disabled = true;
+
+}
+
+    elements.loginBtn.textContent = 'Logging in...';        this.token = data.token;
+
+function renderAll() {
+
+    renderOverview();    elements.loginError.classList.add('hidden');
+
+    renderCourses();
+
+    renderChart();        async getRecords(page = 1, limit = 100) {        return data.student;
+
+    renderCalendar();
+
+    renderRecords();    try {
+
+}
+
+        console.log('Attempting login with:', { rollNumber, email });        return this.request('GET', `/records?page=${page}&limit=${limit}`);    }
+
+function renderOverview() {
+
+    const overall = state.stats?.overall || {};        const student = await state.client.login(rollNumber, email, password);
+
+    const courses = state.stats?.byCourse || [];
+
+        state.student = student;    }
+
+    elements.overallPercentage.textContent = `${(overall.percentage || 0).toFixed(1)}%`;
+
+    elements.classesAttended.textContent = overall.attendedClasses || 0;        
+
+    elements.totalClasses.textContent = overall.totalClasses || 0;
+
+    elements.activeCourses.textContent = courses.length || 0;        // Store credentials in session    async getAttendanceStats() {
+
+
+
+    const status = calculate75Status(overall.attendedClasses || 0, overall.totalClasses || 0);        sessionStorage.setItem('credentials', JSON.stringify({ rollNumber, email, password }));
+
+    elements.attendanceStatus.textContent = status.value;
+
+    elements.statusLabel.textContent = status.label;            async getAllRecords() {        return this.request('GET', '/stats');
+
+    elements.statusDescription.textContent = status.desc;
+
+}        showDashboard();
+
+
+
+function renderCourses() {        await loadDashboardData();        const all = [];    }
+
+    const courses = state.stats?.byCourse || [];
+
+    const rtuCourses = courses.filter((course) => course.classType === 'RTU_CLASSES');    } catch (error) {
+
+    const labCourses = courses.filter((course) => course.classType === 'LABS');
+
+        console.error('Login error:', error);        let page = 1;
+
+    elements.rtuContent.innerHTML = renderCourseList(rtuCourses);
+
+    elements.labContent.innerHTML = renderCourseList(labCourses);        const errorMessage = error.message || 'Login failed. Please check your credentials.';
+
+}
+
+        elements.loginError.textContent = errorMessage;        let hasMore = true;    async getAttendanceRecords(page = 1, limit = 100) {
 
 function renderCourseList(courses) {
 
-    if (courses.length === 0) {        btn.textContent = 'Login';    e.preventDefault();
+    if (!courses.length) {        elements.loginError.classList.remove('hidden');
 
         return '<p class="text-gray-600 text-center py-8">No courses available</p>';
 
-    }    }    
+    }    } finally {        return this.request('GET', `/records?page=${page}&limit=${limit}`);
 
-    
+
+
+    return courses        elements.loginBtn.disabled = false;
+
+        .slice()
+
+        .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))        elements.loginBtn.textContent = 'Login';        while (hasMore && page < 10) {    }
+
+        .map((course) => {
+
+            const percentage = course.percentage || 0;    }
+
+            const attended = course.attendedClasses || 0;
+
+            const total = course.totalClasses || 0;});            const data = await this.getRecords(page, 100);
+
+            const progressColor = percentage >= 75 ? 'bg-green-600' : percentage >= 65 ? 'bg-yellow-500' : 'bg-red-600';
+
+            return `
+
+                <div class="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+
+                    <div class="flex justify-between items-center mb-2">// Event: Logout Button            all.push(...(data.records || []));    async getAllAttendanceRecords() {
+
+                        <h4 class="font-medium text-gray-900">${course.courseName || 'Unknown Course'}</h4>
+
+                        <span class="text-sm font-medium ${percentage >= 75 ? 'text-green-600' : 'text-red-600'}">${percentage.toFixed(1)}%</span>elements.logoutBtn.addEventListener('click', () => {
+
+                    </div>
+
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">    sessionStorage.removeItem('credentials');            hasMore = data.pagination?.hasNextPage || false;        const records = [];
+
+                        <div class="${progressColor} h-2 rounded-full" style="width: ${Math.min(100, percentage)}%"></div>
+
+                    </div>    state.client.token = null;
+
+                    <p class="text-xs text-gray-600">${attended}/${total} classes</p>
+
+                </div>    state.student = null;            page++;        let page = 1;
+
+            `;
+
+        })    state.stats = null;
+
+        .join('');
+
+}    state.records = [];        }        let hasMore = true;
+
+
+
+function renderChart() {    
+
+    const canvas = document.getElementById('attendanceChart');
+
+    if (!canvas || typeof Chart === 'undefined') {    elements.loginScreen.classList.remove('hidden');
+
+        return;
+
+    }    elements.dashboardScreen.classList.add('hidden');
+
+
+
+    const courses = (state.stats?.byCourse || [])    elements.loginForm.reset();        return all;        while (hasMore) {
+
+        .slice()
+
+        .sort((a, b) => (b.totalClasses || 0) - (a.totalClasses || 0))});
+
+        .slice(0, 8);
+
+    }            const data = await this.getAttendanceRecords(page, 100);
+
+    if (state.chart) {
+
+        state.chart.destroy();// Event: Tab Switching
+
+    }
+
+document.querySelectorAll('.tab-btn').forEach(btn => {}            records.push(...(data.records || []));
+
+    state.chart = new Chart(canvas, {
+
+        type: 'bar',    btn.addEventListener('click', () => {
+
+        data: {
+
+            labels: courses.map((course) => {        const targetTab = btn.dataset.tab;            hasMore = data.pagination?.hasNextPage || false;
+
+                const name = course.courseName || course.courseCode || 'Course';
+
+                return name.length > 15 ? `${name.slice(0, 15)}…` : name;        
+
+            }),
+
+            datasets: [        // Update button states// State            page++;
+
+                {
+
+                    label: 'Attended',        document.querySelectorAll('.tab-btn').forEach(b => {
+
+                    data: courses.map((course) => course.attendedClasses || 0),
+
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)'            b.classList.remove('tab-active');const state = {        }
+
+                },
+
+                {            b.classList.add('text-gray-600', 'hover:text-gray-900');
+
+                    label: 'Missed',
+
+                    data: courses.map((course) => Math.max(0, (course.totalClasses || 0) - (course.attendedClasses || 0))),        });    client: new ApiClient(),
+
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)'
+
+                }        btn.classList.add('tab-active');
+
+            ]
+
+        },        btn.classList.remove('text-gray-600', 'hover:text-gray-900');    student: null,        return records;
+
+        options: {
+
+            responsive: true,        
+
+            maintainAspectRatio: false,
+
+            plugins: {        // Update tab content    stats: null,    }
+
+                legend: { position: 'top' }
+
+            },        document.querySelectorAll('.tab-content').forEach(content => {
+
+            scales: {
+
+                x: { stacked: true },            content.classList.add('hidden');    records: [],}
+
+                y: { stacked: true, beginAtZero: true }
+
+            }        });
+
+        }
+
+    });            chart: null
+
+}
+
+        if (targetTab === 'rtu') {
+
+function renderCalendar() {
+
+    if (!elements.calendarDays) {            document.getElementById('rtuTab').classList.remove('hidden');};// UI State Management
+
+        return;
+
+    }        } else if (targetTab === 'lab') {
+
+
+
+    const now = new Date();            document.getElementById('labTab').classList.remove('hidden');const state = {
+
+    const year = now.getFullYear();
+
+    const month = now.getMonth();        } else if (targetTab === 'records') {
+
+    const monthNames = [
+
+        'January', 'February', 'March', 'April', 'May', 'June',            document.getElementById('recordsTab').classList.remove('hidden');// DOM    client: new ApiClient(),
+
+        'July', 'August', 'September', 'October', 'November', 'December'
+
+    ];            if (state.records.length === 0) {
+
+
+
+    elements.calendarTitle.textContent = `${monthNames[month]} ${year}`;                loadRecords();const $ = (id) => document.getElementById(id);    student: null,
+
+
+
+    const firstDay = new Date(year, month, 1).getDay();            }
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        }    stats: null,
+
+    const attendanceMap = {};
+
+    state.records.forEach((record) => {    });
+
+        const date = new Date(record.date || record.markedAt);
+
+        if (Number.isNaN(date.getTime())) {});// Event: Login    records: []
+
+            return;
+
+        }
+
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+        attendanceMap[key] = record.status === 'PRESENT' ? 'present' : 'absent';// UI Functions$('loginForm').addEventListener('submit', async (e) => {};
+
+    });
+
+function showDashboard() {
+
+    const fragments = [];
+
+    elements.loginScreen.classList.add('hidden');    e.preventDefault();
+
+    for (let i = 0; i < firstDay; i += 1) {
+
+        fragments.push('<div class="calendar-day bg-gray-50"></div>');    elements.dashboardScreen.classList.remove('hidden');
+
+    }
+
+        // DOM Elements
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+
+        const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;    if (state.student) {
+
+        const status = attendanceMap[key];
+
+        const classes = [        elements.studentName.textContent = `Welcome, ${state.student.name || 'Student'}`;    const btn = $('loginBtn');const elements = {
+
+            'calendar-day',
+
+            'bg-white',        elements.studentRoll.textContent = state.student.rollNumber || '';
+
+            'rounded',
+
+            'p-2',            const error = $('loginError');    loginScreen: document.getElementById('loginScreen'),
+
+            'text-center',
+
+            'transition'        // Update profile avatar if element exists
+
+        ];
+
+        const avatar = $('profileAvatar');    const rollNumber = $('rollNumber').value.trim();    dashboardScreen: document.getElementById('dashboardScreen'),
+
+        if (day === now.getDate()) {
+
+            classes.push('today');        if (avatar) {
+
+        }
+
+            avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.student.name || 'S')}&background=667eea&color=fff&size=128`;    const email = $('email').value.trim();    loginForm: document.getElementById('loginForm'),
+
+        if (status === 'present') {
+
+            classes.push('present');        }
+
+        } else if (status === 'absent') {
+
+            classes.push('absent');    }    const password = $('password').value;    loginError: document.getElementById('loginError'),
+
+        }
+
+}
+
+        fragments.push(`<div class="${classes.join(' ')}">${day}</div>`);
+
+    }        loginBtn: document.getElementById('loginBtn'),
+
+
+
+    elements.calendarDays.innerHTML = fragments.join('');async function loadDashboardData() {
+
+}
+
+    try {    btn.disabled = true;    logoutBtn: document.getElementById('logoutBtn'),
+
+function renderRecords() {
+
+    if (!elements.recordsContent) {        state.stats = await state.client.getStats();
+
+        return;
+
+    }        renderOverview();    btn.textContent = 'Logging in...';    studentName: document.getElementById('studentName'),
+
+
+
+    if (!state.records.length) {        renderPerformance();
+
+        elements.recordsContent.innerHTML = `
+
+            <tr><td colspan="5" class="text-center py-8 text-gray-600">No records available</td></tr>    } catch (error) {    error.classList.add('hidden');    studentRoll: document.getElementById('studentRoll'),
+
+        `;
+
+        return;        console.error('Failed to load dashboard data:', error);
+
+    }
+
+        alert('Failed to load attendance data. Please try again.');        overallPercentage: document.getElementById('overallPercentage'),
+
+    const rows = state.records
+
+        .slice()    }
+
+        .sort((a, b) => new Date(b.markedAt || b.date) - new Date(a.markedAt || a.date))
+
+        .map((record) => {}    try {    classesAttended: document.getElementById('classesAttended'),
+
+            const date = new Date(record.date || record.markedAt);
+
+            const markedAt = new Date(record.markedAt || record.date);
+
+            const courseName = record.course?.name || record.courseName || 'Unknown';
+
+            const status = record.status || 'UNKNOWN';function renderOverview() {        state.student = await state.client.login(rollNumber, email, password);    totalClasses: document.getElementById('totalClasses'),
+
+            const teacher = record.teacher?.name || '-';
+
+            const statusClass = status === 'PRESENT' ? 'status-present' : 'status-absent';    const overall = state.stats?.overall || {};
+
+            const statusIcon = status === 'PRESENT' ? '✅' : '❌';
+
+    const courses = state.stats?.byCourse || [];        sessionStorage.setItem('credentials', JSON.stringify({ rollNumber, email, password }));    activeCourses: document.getElementById('activeCourses'),
+
+            return `
+
+                <tr class="hover:bg-gray-50">    
+
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm whitespace-nowrap">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm whitespace-nowrap">${markedAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>    elements.overallPercentage.textContent = `${(overall.percentage || 0).toFixed(1)}%`;            rtuContent: document.getElementById('rtuContent'),
+
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900"><div class="max-w-xs truncate" title="${courseName}">${courseName}</div></td>
+
+                    <td class="px-2 sm:px-4 py-2 sm:py-3">    elements.classesAttended.textContent = overall.attendedClasses || 0;
+
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+
+                            ${statusIcon} ${status.charAt(0) + status.slice(1).toLowerCase()}    elements.totalClasses.textContent = overall.totalClasses || 0;        showDashboard();    labContent: document.getElementById('labContent'),
+
+                        </span>
+
+                    </td>    elements.activeCourses.textContent = courses.length || 0;
+
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-600 hidden sm:table-cell">${teacher}</td>
+
+                </tr>}        await loadData();    recordsContent: document.getElementById('recordsContent'),
+
+            `;
+
+        })
+
+        .join('');
+
+function renderPerformance() {    } catch (err) {    recordsLoading: document.getElementById('recordsLoading')
+
+    elements.recordsContent.innerHTML = rows;
+
+}    const courses = state.stats?.byCourse || [];
+
+
+
+function hydrateFromCache() {    const rtuCourses = courses.filter(c => c.classType === 'RTU_CLASSES');        error.textContent = err.message || 'Login failed';};
+
+    const cachedStats = localStorage.getItem('stats');
+
+    const cachedRecords = localStorage.getItem('records');    const labCourses = courses.filter(c => c.classType === 'LABS');
+
+
+
+    if (cachedStats) {            error.classList.remove('hidden');
+
+        try {
+
+            state.stats = JSON.parse(cachedStats);    elements.rtuContent.innerHTML = renderCourseList(rtuCourses);
+
+        } catch (_) {
+
+            localStorage.removeItem('stats');    elements.labContent.innerHTML = renderCourseList(labCourses);    } finally {// Event Handlers
+
+        }
+
+    }}
+
+
+
+    if (cachedRecords) {        btn.disabled = false;elements.loginForm.addEventListener('submit', async (e) => {
+
+        try {
+
+            state.records = JSON.parse(cachedRecords);function renderCourseList(courses) {
+
+        } catch (_) {
+
+            localStorage.removeItem('records');    if (courses.length === 0) {        btn.textContent = 'Login';    e.preventDefault();
+
+        }
+
+    }        return '<p class="text-gray-600 text-center py-8">No courses available</p>';
+
+
+
+    if (state.stats || state.records.length) {    }    }    
+
+        renderAll();
+
+    }    
+
+}
 
     // Sort by percentage descending});    const rollNumber = document.getElementById('rollNumber').value.trim();
 
-    courses.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+async function tryAutoLogin() {
 
-        const email = document.getElementById('email').value.trim();
+    const stored = sessionStorage.getItem('credentials');    courses.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+
+    if (!stored) {
+
+        return;        const email = document.getElementById('email').value.trim();
+
+    }
 
     return courses.map(course => {
 
-        const percentage = course.percentage || 0;// Event: Logout    const password = document.getElementById('password').value;
+    try {
 
-        const attended = course.attendedClasses || 0;
+        const credentials = JSON.parse(stored);        const percentage = course.percentage || 0;// Event: Logout    const password = document.getElementById('password').value;
 
-        const total = course.totalClasses || 0;$('logoutBtn').addEventListener('click', () => {    
+        state.student = await state.client.login(credentials.rollNumber, credentials.email, credentials.password);
+
+        showDashboard();        const attended = course.attendedClasses || 0;
+
+        await loadData();
+
+    } catch (error) {        const total = course.totalClasses || 0;$('logoutBtn').addEventListener('click', () => {    
+
+        console.error('Auto-login failed:', error);
+
+        sessionStorage.removeItem('credentials');        
+
+        showLogin();
+
+    }        const progressColor = percentage >= 75 ? 'bg-green-600' : percentage >= 65 ? 'bg-yellow-500' : 'bg-red-600';    sessionStorage.clear();    elements.loginBtn.disabled = true;
+
+}
 
         
 
-        const progressColor = percentage >= 75 ? 'bg-green-600' : percentage >= 65 ? 'bg-yellow-500' : 'bg-red-600';    sessionStorage.clear();    elements.loginBtn.disabled = true;
+(function init() {
 
-        
+    bindEvents();        return `    localStorage.clear();    elements.loginBtn.textContent = 'Logging in...';
 
-        return `    localStorage.clear();    elements.loginBtn.textContent = 'Logging in...';
+    hydrateFromCache();
 
-            <div class="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+    tryAutoLogin();            <div class="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+
+})();
 
                 <div class="flex justify-between items-center mb-2">    location.reload();    elements.loginError.classList.add('hidden');
 
