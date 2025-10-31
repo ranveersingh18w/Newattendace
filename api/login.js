@@ -46,9 +46,20 @@ module.exports = async (req, res) => {
         });
         
         if (!response.ok) {
-            const errorText = await response.text();
+            let errorText = await response.text();
+            let errorMessage = errorText;
+            
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorJson.error || errorText;
+            } catch (e) {
+                // errorText is not JSON, use as-is
+            }
+            
+            console.error('Authentication failed:', response.status, errorMessage);
             return res.status(response.status).json({ 
-                error: `Authentication failed: ${errorText}` 
+                error: errorMessage,
+                status: response.status
             });
         }
         

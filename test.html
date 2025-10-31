@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <button onclick="testLogin()">Test Login API</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testLogin() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rollNumber: '24etcad024',
+                        email: 'ranveersingh18w@gmail.com',
+                        password: 'Rsdsingh@9602'
+                    })
+                });
+                
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+                
+                if (response.ok) {
+                    resultEl.style.color = 'green';
+                } else {
+                    resultEl.style.color = 'red';
+                }
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+                resultEl.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

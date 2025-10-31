@@ -1,5 +1,5 @@
 {
-  "name": "techno-njr-attendance",
+  "name": "newattendance",
   "version": "1.0.0",
   "description": "Techno NJR Attendance Portal - Secure student attendance tracking system",
   "main": "app.js",

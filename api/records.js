@@ -51,9 +51,20 @@ module.exports = async (req, res) => {
         );
         
         if (!response.ok) {
-            const errorText = await response.text();
+            let errorText = await response.text();
+            let errorMessage = errorText;
+            
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorJson.error || errorText;
+            } catch (e) {
+                // errorText is not JSON, use as-is
+            }
+            
+            console.error('Records fetch failed:', response.status, errorMessage);
             return res.status(response.status).json({ 
-                error: `Failed to fetch records: ${errorText}` 
+                error: errorMessage,
+                status: response.status
             });
         }
         
