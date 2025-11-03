@@ -1,29 +1,40 @@
-﻿// Performance optimization: Use relative URLs for Vercel
+﻿// Use relative URLs on production, localhost for dev
 const BACKEND_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
     ? 'http://localhost:3000' 
     : '';
 
-const API_TIMEOUT = 8000; // 8 second timeout
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minute cache
+// Caching and timeout configuration
+const API_TIMEOUT = 8000; // 8 seconds
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const apiCache = {};
+const cacheTimestamps = {};
 
 let apiClient = null;
+
 let attendanceData = null;
+
 let allRecords = [];
+
 let sortedCourses = [];
+
 let currentMonth = new Date();
+
 let charts = { monthly: null, weekly: null, daily: null, subject: null, donut: null, comparison: null };
+
 let selectedSubject = null;
+
 let currentToken = null;
-let apiCache = {}; // Simple cache for API responses
-let cacheTimestamps = {};
 
 class ApiClient {
 
     constructor(token = null) {
+
         this.token = token;
+
     }
 
     async request(method, path, options = {}) {
+
         // Check cache for GET requests
         if (method === 'GET' && apiCache[path]) {
             const timestamp = cacheTimestamps[path] || 0;
@@ -33,20 +44,30 @@ class ApiClient {
         }
 
         const headers = {
+
             'Content-Type': 'application/json',
+
             ...(options.headers || {})
+
         };
 
         const config = {
+
             method,
+
             headers,
+
             ...options
+
         };
 
         if (options.body) {
+
             config.body = JSON.stringify(options.body);
+
         }
 
+        // Add timeout support with AbortController
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
 
@@ -59,12 +80,15 @@ class ApiClient {
             clearTimeout(timeoutId);
 
             if (!response.ok) {
+
                 const errorText = await response.text();
+
                 throw new Error(errorText || `Request failed with status ${response.status}`);
+
             }
 
             const data = await response.json();
-            
+
             // Cache GET responses
             if (method === 'GET') {
                 apiCache[path] = data;
@@ -79,28 +103,41 @@ class ApiClient {
             }
             throw error;
         }
+
     }
 
     async login(rollNumber, email, password) {
+
         const data = await this.request('POST', '/api/login', {
+
             body: { rollNumber, email, password }
+
         });
 
         if (!data.token) {
+
             throw new Error('No token received from API');
+
         }
 
         this.token = data.token;
+
         currentToken = data.token;
+
         return data.student;
+
     }
 
     async getAttendanceStats() {
+
         return this.request('GET', `/api/attendance/stats?token=${this.token}`);
+
     }
 
     async getAttendanceRecords(page = 1, limit = 100) {
+
         return this.request('GET', `/api/attendance/records?token=${this.token}&page=${page}&limit=${limit}`);
+
     }
 
     async getAllAttendanceRecords() {
@@ -1061,15 +1098,13 @@ function renderRecentActivity() {
 let currentWeekStart = new Date();
 currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
 
-// Lazy-load and defer chart rendering for performance
 function renderCharts() {
+    // Render stats and summary first for quick feedback
     updateOverallStats();
-    
-    // Render basic stats first
     renderMonthlySummary();
     renderSubjectDetails();
     
-    // Defer chart rendering to avoid blocking UI
+    // Defer heavy chart rendering to avoid blocking UI
     setTimeout(() => {
         renderMonthlyChart();
         renderWeeklyChart();
