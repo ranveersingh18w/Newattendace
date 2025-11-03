@@ -1,101 +1,106 @@
-﻿const BACKEND_URL = 'http://localhost:3000';
+﻿// Performance optimization: Use relative URLs for Vercel
+const BACKEND_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : '';
+
+const API_TIMEOUT = 8000; // 8 second timeout
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minute cache
 
 let apiClient = null;
-
 let attendanceData = null;
-
 let allRecords = [];
-
 let sortedCourses = [];
-
 let currentMonth = new Date();
-
 let charts = { monthly: null, weekly: null, daily: null, subject: null, donut: null, comparison: null };
-
 let selectedSubject = null;
-
 let currentToken = null;
+let apiCache = {}; // Simple cache for API responses
+let cacheTimestamps = {};
 
 class ApiClient {
 
     constructor(token = null) {
-
         this.token = token;
-
     }
 
     async request(method, path, options = {}) {
+        // Check cache for GET requests
+        if (method === 'GET' && apiCache[path]) {
+            const timestamp = cacheTimestamps[path] || 0;
+            if (Date.now() - timestamp < CACHE_DURATION) {
+                return apiCache[path];
+            }
+        }
 
         const headers = {
-
             'Content-Type': 'application/json',
-
             ...(options.headers || {})
-
         };
 
         const config = {
-
             method,
-
             headers,
-
             ...options
-
         };
 
         if (options.body) {
-
             config.body = JSON.stringify(options.body);
-
         }
 
-        const response = await fetch(`${BACKEND_URL}${path}`, config);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
 
-        if (!response.ok) {
+        try {
+            const response = await fetch(`${BACKEND_URL}${path}`, {
+                ...config,
+                signal: controller.signal
+            });
 
-            const errorText = await response.text();
+            clearTimeout(timeoutId);
 
-            throw new Error(errorText || `Request failed with status ${response.status}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Request failed with status ${response.status}`);
+            }
 
+            const data = await response.json();
+            
+            // Cache GET responses
+            if (method === 'GET') {
+                apiCache[path] = data;
+                cacheTimestamps[path] = Date.now();
+            }
+
+            return data;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - server is slow, please try again');
+            }
+            throw error;
         }
-
-        return response.json();
-
     }
 
     async login(rollNumber, email, password) {
-
         const data = await this.request('POST', '/api/login', {
-
             body: { rollNumber, email, password }
-
         });
 
         if (!data.token) {
-
             throw new Error('No token received from API');
-
         }
 
         this.token = data.token;
-
         currentToken = data.token;
-
         return data.student;
-
     }
 
     async getAttendanceStats() {
-
         return this.request('GET', `/api/attendance/stats?token=${this.token}`);
-
     }
 
     async getAttendanceRecords(page = 1, limit = 100) {
-
         return this.request('GET', `/api/attendance/records?token=${this.token}&page=${page}&limit=${limit}`);
-
     }
 
     async getAllAttendanceRecords() {
@@ -1056,16 +1061,23 @@ function renderRecentActivity() {
 let currentWeekStart = new Date();
 currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
 
+// Lazy-load and defer chart rendering for performance
 function renderCharts() {
     updateOverallStats();
-    renderMonthlyChart();
-    renderWeeklyChart();
-    renderDailyChart();
-    renderSubjectChart();
-    renderDonutChart();
-    renderComparisonChart();
+    
+    // Render basic stats first
     renderMonthlySummary();
     renderSubjectDetails();
+    
+    // Defer chart rendering to avoid blocking UI
+    setTimeout(() => {
+        renderMonthlyChart();
+        renderWeeklyChart();
+        renderDailyChart();
+        renderSubjectChart();
+        renderDonutChart();
+        renderComparisonChart();
+    }, 100);
 }
 
 function updateOverallStats() {
