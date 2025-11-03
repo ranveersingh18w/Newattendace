@@ -3,346 +3,1285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Techno NJR Attendance Portal</title>
+    <title>Attendance Portal - Enhanced</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-        .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+
+        /* Professional Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .tab-active {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 3px solid #667eea;
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        .progress-bar {
-            transition: width 0.6s ease;
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        .status-present {
-            background: #d1fae5;
-            color: #065f46;
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
-        .status-absent {
-            background: #fee2e2;
-            color: #991b1b;
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.98); }
         }
-        .calendar-day {
-            min-height: 40px;
-            border: 1px solid #e5e7eb;
-            transition: all 0.2s;
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
         }
-        .calendar-day:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(4); opacity: 0; }
         }
-        .calendar-day.present {
-            background: #d1fae5;
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
-        .calendar-day.absent {
-            background: #fee2e2;
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
-        .calendar-day.today {
-            border: 2px solid #667eea;
-            font-weight: bold;
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
-        .stat-card {
-            transition: transform 0.2s, box-shadow 0.2s;
+
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+        .slide-in {
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        .slide-in-right {
+            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .scale-in {
+            animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .animate-fadeIn {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+            border-radius: 8px;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Ripple effect */
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .ripple-effect:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Profile Avatar */
         .profile-avatar {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            transition: transform 0.3s ease;
         }
-        .sidebar {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
+
+        .profile-avatar:hover {
+            transform: scale(1.1);
         }
-        
-        /* Mobile-specific improvements */
-        @media (max-width: 640px) {
-            .tab-btn {
-                font-size: 0.813rem;
-                padding: 0.75rem 0.5rem;
+
+        /* Card Styles with Professional Animations */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: height 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card:hover::before {
+            height: 6px;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: rotate 1s linear infinite;
+        }
+
+        /* Button Enhancements */
+        button, .btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover, .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active, .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Tab transitions */
+        .tab-button {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .tab-button:hover::after,
+        .tab-button.active::after {
+            width: 100%;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.1);
+        }
+
+        .calendar-day.present {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .calendar-day.absent {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .calendar-day.empty {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .calendar-day.today {
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+        /* Tab Styles */
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            color: var(--primary);
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 999px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .calendar-day {
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        .calendar-day:hover {
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Analytics Tab Styles */
+        .analytics-tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-tab:hover {
+            color: var(--primary);
+        }
+
+        .analytics-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .analytics-view {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .analytics-view.hidden {
+            display: none;
+        }
+
+        /* Comprehensive Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
             }
+
+            /* Stat cards */
             .stat-card {
-                padding: 0.875rem !important;
+                padding: 16px;
             }
-            .stat-value {
-                font-size: 1.5rem !important;
+
+            .stat-card:hover {
+                transform: translateY(-4px) scale(1.01);
             }
-            table {
-                font-size: 0.813rem;
+
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+                margin-bottom: 12px;
             }
-            table th, table td {
-                padding: 0.5rem 0.25rem !important;
+
+            /* Calendar fully responsive */
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                font-size: 11px;
+                border-radius: 6px;
+                min-height: 36px;
+            }
+
+            .calendar-day:hover {
+                transform: scale(1.05);
+            }
+
+            /* Tab buttons */
+            .tab-button {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            /* Charts */
+            .chart-container {
+                height: 220px;
+                margin: 15px 0;
+            }
+
+            /* Modal adjustments */
+            .modal-content {
+                padding: 16px;
+                max-height: 85vh;
+            }
+
+            /* Profile avatar */
+            .profile-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            /* Text sizes */
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+
+            /* Padding adjustments */
+            .p-8 { padding: 1rem; }
+            .p-6 { padding: 0.75rem; }
+            .p-4 { padding: 0.5rem; }
+
+            /* Grid responsive */
+            .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+
+            /* Buttons */
+            button, .btn {
+                padding: 12px 20px;
+                font-size: 14px;
             }
         }
-        
-        /* Touch targets for mobile */
+
+        @media (max-width: 480px) {
+            /* Extra small devices */
+            .calendar-day {
+                font-size: 10px;
+                min-height: 32px;
+            }
+
+            .calendar-grid {
+                gap: 2px;
+            }
+
+            .stat-card {
+                padding: 12px;
+            }
+
+            .stat-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            .chart-container {
+                height: 200px;
+            }
+
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+            h3 { font-size: 1.125rem; }
+
+            /* Tab buttons scroll */
+            .tab-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-button {
+                padding: 8px 12px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+        }
+
+        /* Tablet landscape */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+        }
+
+        /* Touch device improvements */
         @media (hover: none) and (pointer: coarse) {
-            button, .tab-btn {
+            .stat-card:hover {
+                transform: none;
+            }
+
+            .calendar-day:hover {
+                transform: none;
+            }
+
+            button:hover, .btn:hover {
+                transform: none;
+            }
+
+            /* Larger touch targets */
+            button, .btn, .calendar-day, .tab-button {
                 min-height: 44px;
                 min-width: 44px;
             }
         }
-        
-        .overflow-x-auto {
-            -webkit-overflow-scrolling: touch;
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stat-card {
+                padding: 16px;
+            }
+
+            .calendar-day {
+                font-size: 10px;
+            }
+
+            .tab-button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="antialiased">
     <!-- Login Screen -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="glass rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 fade-in">
             <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+                <div class="inline-block p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4">
+                    <i class="fas fa-graduation-cap text-4xl text-white"></i>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900">Techno NJR</h1>
-                <p class="text-gray-600 mt-2">Attendance Portal</p>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Student Portal</h1>
+                <p class="text-gray-500">Access your attendance dashboard</p>
             </div>
+
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Roll Number</label>
-                    <input 
-                        type="text" 
-                        id="rollNumber" 
-                        required
-                        placeholder="24ETCAD024"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
+                    <input type="text" id="rollNumber" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                        placeholder="24etcad024">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        required
-                        placeholder="your.email@example.com"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
+                    <input type="email" id="email" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                        placeholder="your.email@example.com">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
+                    <input type="password" id="password" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                        placeholder="••••••••">
                 </div>
-                <button 
-                    type="submit"
-                    id="loginBtn"
-                    class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-600 transition-all shadow-lg"
-                >
-                    Login
+
+                <button type="submit" id="loginBtn"
+                    class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-indigo-600 hover:to-purple-700 transition transform hover:scale-105 active:scale-95">
+                    <span id="loginText">Sign In</span>
+                    <span id="loginSpinner" class="hidden">
+                        <i class="fas fa-spinner fa-spin"></i> Signing in...
+                    </span>
                 </button>
-                <div id="loginError" class="text-red-600 text-sm text-center hidden"></div>
             </form>
+
+            <div id="loginError" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm hidden">
+            </div>
         </div>
     </div>
 
-    <!-- Dashboard Screen -->
-    <div id="dashboardScreen" class="hidden min-h-screen">
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden min-h-screen">
         <!-- Header -->
-        <header class="glass shadow-lg">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-4 min-w-0 flex-1">
-                        <img 
-                            id="profileAvatar" 
-                            src="https://ui-avatars.com/api/?name=Student&background=667eea&color=fff" 
-                            alt="Profile"
-                            class="profile-avatar"
-                        />
-                        <div class="min-w-0 flex-1">
-                            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 truncate" id="studentName">Welcome</h1>
-                            <p class="text-xs sm:text-sm text-gray-600 truncate" id="studentRoll"></p>
+        <header class="bg-white shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="profile-avatar" id="profileAvatar">RS</div>
+                        <div>
+                            <h2 class="font-bold text-gray-800" id="studentName">Loading...</h2>
+                            <p class="text-sm text-gray-500" id="studentRoll">Loading...</p>
                         </div>
                     </div>
-                    <button 
-                        id="logoutBtn"
-                        class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all shadow-md flex-shrink-0"
-                    >
-                        Logout
+                    <button onclick="logout()" 
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
                     </button>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="container mx-auto px-4 py-8">
             <!-- Overview Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <!-- Overall Attendance -->
-                <div class="glass rounded-xl shadow-lg p-6 stat-card">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="text-sm font-medium text-gray-600">Overall</div>
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-900 stat-value" id="overallPercentage">-</div>
-                    <p class="text-xs text-gray-600 mt-2">Total attendance</p>
-                </div>
-
-                <!-- Classes Attended -->
-                <div class="glass rounded-xl shadow-lg p-6 stat-card">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="text-sm font-medium text-gray-600">Attended</div>
-                        <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-900 stat-value" id="classesAttended">-</div>
-                    <p class="text-xs text-gray-600 mt-2">Classes present</p>
-                </div>
-
-                <!-- Total Classes -->
-                <div class="glass rounded-xl shadow-lg p-6 stat-card">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="text-sm font-medium text-gray-600">Total Classes</div>
-                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-900 stat-value" id="totalClasses">-</div>
-                    <p class="text-xs text-gray-600 mt-2">All courses</p>
-                </div>
-
-                <!-- Attendance Status -->
-                <div class="glass rounded-xl shadow-lg p-6 stat-card">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="text-sm font-medium text-gray-600" id="statusLabel">For 75%</div>
-                        <div class="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-900 stat-value" id="attendanceStatus">-</div>
-                    <p class="text-xs text-gray-600 mt-2" id="statusDescription">Classes to attend</p>
-                </div>
-            </div>
-
-            <!-- Charts and Calendar Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <!-- Attendance Chart -->
-                <div class="lg:col-span-2 glass rounded-xl shadow-lg p-6">
-                    <h2 class="text-lg font-bold text-gray-900 mb-4">Subject-wise Attendance</h2>
-                    <div class="h-64">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Calendar -->
-                <div class="glass rounded-xl shadow-lg p-6">
-                    <h2 class="text-lg font-bold text-gray-900 mb-4" id="calendarTitle">Attendance Calendar</h2>
-                    <div id="calendar" class="text-sm">
-                        <div class="grid grid-cols-7 gap-1 mb-2 text-center font-semibold text-gray-600">
-                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                        </div>
-                        <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
-                    </div>
-                    <div class="mt-4 flex items-center justify-between text-xs">
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 bg-green-200 rounded"></div>
-                            <span class="text-gray-600">Present</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 bg-red-200 rounded"></div>
-                            <span class="text-gray-600">Absent</span>
-                        </div>
-                    </div>
-                </div>
+            <div id="overviewCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Loading skeletons will be replaced with actual cards -->
             </div>
 
             <!-- Tabs -->
-            <div class="glass rounded-xl shadow-lg">
-                <div class="border-b border-gray-200 px-4 overflow-x-auto">
-                    <nav class="flex space-x-2 sm:space-x-4 min-w-max">
-                        <button 
-                            class="tab-btn py-3 sm:py-4 px-3 sm:px-4 text-sm font-medium tab-active whitespace-nowrap transition-all"
-                            data-tab="rtu"
-                        >
-                            📚 RTU Performance
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="border-b border-gray-200 overflow-x-auto">
+                    <div class="flex flex-wrap">
+                        <button class="tab-button active" onclick="switchTab('overview')">
+                            <i class="fas fa-chart-line mr-2"></i>Overview
                         </button>
-                        <button 
-                            class="tab-btn py-3 sm:py-4 px-3 sm:px-4 text-sm font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap transition-all"
-                            data-tab="lab"
-                        >
-                            🔬 Lab Performance
+                        <button class="tab-button" onclick="switchTab('subjects')">
+                            <i class="fas fa-book mr-2"></i>By Subject
                         </button>
-                        <button 
-                            class="tab-btn py-3 sm:py-4 px-3 sm:px-4 text-sm font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap transition-all"
-                            data-tab="records"
-                        >
-                            📋 Records
+                        <button class="tab-button" onclick="switchTab('calendar')">
+                            <i class="fas fa-calendar-alt mr-2"></i>Calendar View
                         </button>
-                    </nav>
+                        <button class="tab-button" onclick="switchTab('activity')">
+                            <i class="fas fa-history mr-2"></i>Recent Activity
+                        </button>
+                        <button class="tab-button" onclick="switchTab('charts')">
+                            <i class="fas fa-chart-bar mr-2"></i>Analytics
+                        </button>
+                        <button class="tab-button" onclick="switchTab('records')">
+                            <i class="fas fa-list mr-2"></i>All Records
+                        </button>
+                        <button class="tab-button" onclick="switchTab('profile')">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </button>
+                    </div>
                 </div>
 
-                <!-- RTU Performance Tab -->
-                <div id="rtuTab" class="tab-content p-6">
-                    <div id="rtuContent" class="space-y-4"></div>
-                </div>
+                <div class="p-6">
+                    <!-- Overview Tab -->
+                    <div id="overviewTab" class="tab-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-tachometer-alt text-indigo-600 mr-2"></i>
+                                    Quick Stats
+                                </h3>
+                                <div id="overviewStats" class="space-y-4">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                            </div>
 
-                <!-- Lab Performance Tab -->
-                <div id="labTab" class="tab-content p-6 hidden">
-                    <div id="labContent" class="space-y-4"></div>
-                </div>
-
-                <!-- Records Tab -->
-                <div id="recordsTab" class="tab-content p-6 hidden">
-                    <div class="overflow-x-auto -mx-4 sm:mx-0">
-                        <div class="inline-block min-w-full align-middle">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">Date</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">Time</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-600">Course</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">Status</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 hidden sm:table-cell">Teacher</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recordsContent" class="bg-white divide-y divide-gray-200">
-                                </tbody>
-                            </table>
+                            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-hourglass-end text-purple-600 mr-2"></i>
+                                    Attendance Breakdown
+                                </h3>
+                                <div id="attendanceBreakdown" class="space-y-3">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                            </div>
                         </div>
-                        <div id="recordsLoading" class="text-center py-8 text-gray-600 text-sm">
-                            Loading records...
+                    </div>
+
+                    <!-- By Subject Tab - RTU Left, Labs Right -->
+                    <div id="subjectsTab" class="tab-content hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2">📚 Subject-wise Attendance</h2>
+                            <p class="text-gray-600">RTU Classes on left, Lab Classes on right</p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- RTU Subjects (Left) -->
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-lg">
+                                <h3 class="text-xl font-bold text-blue-900 mb-4 pb-3 border-b-4 border-blue-500 flex items-center gap-2">
+                                    <span class="text-3xl">🎓</span> RTU Classes
+                                </h3>
+                                <div id="rtuSubjectsList" class="space-y-3">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                            <!-- Labs (Right) -->
+                            <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl shadow-lg">
+                                <h3 class="text-xl font-bold text-orange-900 mb-4 pb-3 border-b-4 border-orange-500 flex items-center gap-2">
+                                    <span class="text-3xl">🔬</span> Lab Classes
+                                </h3>
+                                <div id="labSubjectsList" class="space-y-3">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Tab -->
+                    <div id="calendarTab" class="tab-content hidden">
+                        <div class="max-w-6xl mx-auto">
+                            <div class="flex items-center justify-between mb-6">
+                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <h3 class="text-2xl font-bold text-gray-900" id="calendarMonth">Loading...</h3>
+                                <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Calendar Grid -->
+                            <div class="bg-white rounded-lg shadow-lg p-4">
+                                <div class="grid grid-cols-7 gap-2 mb-4">
+                                    <div class="text-center font-bold text-gray-600 p-2">Sun</div>
+                                    <div class="text-center font-bold text-gray-600 p-2">Mon</div>
+                                    <div class="text-center font-bold text-gray-600 p-2">Tue</div>
+                                    <div class="text-center font-bold text-gray-600 p-2">Wed</div>
+                                    <div class="text-center font-bold text-gray-600 p-2">Thu</div>
+                                    <div class="text-center font-bold text-gray-600 p-2">Fri</div>
+                                    <div class="text-center font-bold text-gray-600 p-2">Sat</div>
+                                </div>
+                                <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+                                    <!-- Calendar days populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day Details Popup Modal -->
+                    <div id="dayPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-y-auto">
+                            <div class="sticky top-0 bg-gradient-to-r from-purple-600 to-blue-500 text-white p-4 flex justify-between items-center">
+                                <h3 id="popupDate" class="text-lg font-bold">Day Details</h3>
+                                <button onclick="closeDayPopup()" class="text-2xl hover:text-gray-200">&times;</button>
+                            </div>
+                            <div id="popupContent" class="p-4 space-y-3">
+                                <!-- Classes for this day -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Tab -->
+                    <div id="activityTab" class="tab-content hidden">
+                        <div class="space-y-3" id="recentActivityList">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Charts Tab -->
+                    <div id="chartsTab" class="tab-content hidden">
+                        <div class="max-w-6xl mx-auto">
+                            <!-- Tab Header -->
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-bold text-gray-900">📊 Analytics & Charts</h2>
+                                <p class="text-gray-600 mt-1">View your attendance patterns and performance</p>
+                            </div>
+
+                            <!-- Overall Statistics Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-600 text-sm">Overall Attendance</p>
+                                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="overallAttendance">0%</p>
+                                        </div>
+                                        <span class="text-4xl text-indigo-200">📊</span>
+                                    </div>
+                                </div>
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-600 text-sm">Total Classes</p>
+                                            <p class="text-3xl font-bold text-green-600 mt-2" id="totalClasses">0</p>
+                                        </div>
+                                        <span class="text-4xl text-green-200">📚</span>
+                                    </div>
+                                </div>
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-600 text-sm">Present</p>
+                                            <p class="text-3xl font-bold text-blue-600 mt-2" id="totalPresent">0</p>
+                                        </div>
+                                        <span class="text-4xl text-blue-200">✅</span>
+                                    </div>
+                                </div>
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-600 text-sm">Absent</p>
+                                            <p class="text-3xl font-bold text-red-600 mt-2" id="totalAbsent">0</p>
+                                        </div>
+                                        <span class="text-4xl text-red-200">❌</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Analytics Tabs -->
+                            <div class="mb-6 border-b border-gray-200">
+                                <div class="flex gap-2 overflow-x-auto">
+                                    <button onclick="switchAnalyticsTab('monthly')" class="tab-button analytics-tab active" data-tab="monthly">
+                                        <i class="fas fa-calendar mr-2"></i>Monthly
+                                    </button>
+                                    <button onclick="switchAnalyticsTab('weekly')" class="tab-button analytics-tab" data-tab="weekly">
+                                        <i class="fas fa-calendar-week mr-2"></i>Weekly
+                                    </button>
+                                    <button onclick="switchAnalyticsTab('daily')" class="tab-button analytics-tab" data-tab="daily">
+                                        <i class="fas fa-calendar-days mr-2"></i>Daily
+                                    </button>
+                                    <button onclick="switchAnalyticsTab('subject')" class="tab-button analytics-tab" data-tab="subject">
+                                        <i class="fas fa-book mr-2"></i>Subject-wise
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Monthly View -->
+                            <div id="monthlyView" class="analytics-view">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                    <div class="lg:col-span-2 glass rounded-xl shadow-lg p-6">
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="text-2xl">📈</span>
+                                            <h3 class="text-lg font-bold text-gray-900">Monthly Attendance Trend</h3>
+                                        </div>
+                                        <div style="position: relative; height: 350px;">
+                                            <canvas id="monthlyChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="glass rounded-xl shadow-lg p-6">
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="text-2xl">📋</span>
+                                            <h3 class="text-lg font-bold text-gray-900">Monthly Summary</h3>
+                                        </div>
+                                        <div id="monthlySummary" class="space-y-3 text-sm max-h-96 overflow-y-auto">
+                                            <!-- Generated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Weekly View -->
+                            <div id="weeklyView" class="analytics-view hidden">
+                                <div class="glass rounded-xl shadow-lg p-6 mb-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-2xl">📊</span>
+                                            <h3 class="text-lg font-bold text-gray-900">Weekly Attendance Pattern</h3>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="changeWeek(-1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">← Prev</button>
+                                            <span id="weekRange" class="px-3 py-1 text-sm font-semibold">Current Week</span>
+                                            <button onclick="changeWeek(1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Next →</button>
+                                        </div>
+                                    </div>
+                                    <div style="position: relative; height: 350px;">
+                                        <canvas id="weeklyChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-4">Weekly Statistics</h3>
+                                    <div id="weeklyStats" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <!-- Generated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Daily View -->
+                            <div id="dailyView" class="analytics-view hidden">
+                                <div class="glass rounded-xl shadow-lg p-6 mb-6">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span class="text-2xl">📅</span>
+                                        <h3 class="text-lg font-bold text-gray-900">Attendance by Day of Week</h3>
+                                    </div>
+                                    <div style="position: relative; height: 350px;">
+                                        <canvas id="dailyChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-4">Day-wise Breakdown</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div id="dayStats" class="space-y-3">
+                                            <!-- Generated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subject View -->
+                            <div id="subjectView" class="analytics-view hidden">
+                                <div class="glass rounded-xl shadow-lg p-6 mb-6">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span class="text-2xl">📚</span>
+                                        <h3 class="text-lg font-bold text-gray-900">Subject-wise Performance</h3>
+                                    </div>
+                                    <div style="position: relative; height: 400px;">
+                                        <canvas id="subjectChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-4">Detailed Subject Analysis</h3>
+                                    <div id="subjectDetails" class="space-y-3 max-h-96 overflow-y-auto">
+                                        <!-- Generated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Overall Distribution and Comparison -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span class="text-2xl">🎯</span>
+                                        <h3 class="text-lg font-bold text-gray-900">Overall Distribution</h3>
+                                    </div>
+                                    <div style="position: relative; height: 300px;">
+                                        <canvas id="donutChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="glass rounded-xl shadow-lg p-6">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span class="text-2xl">⚖️</span>
+                                        <h3 class="text-lg font-bold text-gray-900">RTU vs Lab Comparison</h3>
+                                    </div>
+                                    <div style="position: relative; height: 300px;">
+                                        <canvas id="comparisonChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Records Tab -->
+                    <div id="recordsTab" class="tab-content hidden">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-gray-800">
+                                <i class="fas fa-list-ul mr-2"></i>All Attendance Records
+                            </h3>
+                            <div class="text-sm text-gray-600">
+                                Total: <span id="totalRecords" class="font-bold">0</span> records
+                            </div>
+                        </div>
+                        <div id="recordsList" class="space-y-3">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Profile Tab -->
+                    <div id="profileTab" class="tab-content hidden">
+                        <div class="max-w-5xl">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                                <i class="fas fa-user mr-2"></i>Student Profile
+                            </h3>
+                            
+                            <!-- Profile Card -->
+                            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-6 mb-6 text-white">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-3xl font-bold text-indigo-600" id="profileInitials">RS</div>
+                                    <div>
+                                        <h2 class="text-3xl font-bold" id="profileName">Loading...</h2>
+                                        <p class="text-indigo-100 mt-2" id="profileDept">Loading...</p>
+                                        <p class="text-indigo-100 mt-1" id="profileRoll">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Personal Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-white rounded-xl shadow-md p-6">
+                                    <h3 class="font-bold text-gray-800 mb-4 text-lg">
+                                        <i class="fas fa-id-card mr-2"></i>Personal Information
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="text-sm text-gray-600">Full Name</label>
+                                            <p class="font-semibold text-gray-800" id="infoName">Loading...</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Roll Number</label>
+                                            <p class="font-semibold text-gray-800" id="infoRoll">Loading...</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Email</label>
+                                            <p class="font-semibold text-gray-800" id="infoEmail">Loading...</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-xl shadow-md p-6">
+                                    <h3 class="font-bold text-gray-800 mb-4 text-lg">
+                                        <i class="fas fa-building mr-2"></i>Academic Information
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="text-sm text-gray-600">Department</label>
+                                            <p class="font-semibold text-gray-800" id="infoDept">Loading...</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Batch</label>
+                                            <p class="font-semibold text-gray-800" id="infoBatch">Loading...</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Semester</label>
+                                            <p class="font-semibold text-gray-800" id="infoSemester">Loading...</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Major</label>
+                                            <p class="font-semibold text-gray-800" id="infoMajor">-</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">CGPA</label>
+                                            <p class="font-semibold text-gray-800" id="infoCGPA">-</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Total Credits</label>
+                                            <p class="font-semibold text-gray-800" id="infoCredits">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status and Stats -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md p-4 border border-green-200">
+                                    <div class="text-sm text-green-700 font-semibold mb-2">Status</div>
+                                    <div class="text-2xl font-bold text-green-600" id="profileStatus">ACTIVE</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-4 border border-blue-200">
+                                    <div class="text-sm text-blue-700 font-semibold mb-2">Attendance</div>
+                                    <div class="text-2xl font-bold text-blue-600" id="profileAttendance">0%</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-md p-4 border border-purple-200">
+                                    <div class="text-sm text-purple-700 font-semibold mb-2">Total Classes</div>
+                                    <div class="text-2xl font-bold text-purple-600" id="profileClasses">0</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl shadow-md p-4 border border-indigo-200">
+                                    <div class="text-sm text-indigo-700 font-semibold mb-2">Profile Completion</div>
+                                    <div class="text-2xl font-bold text-indigo-600">100%</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+    </main>
+
+    <!-- Subject Detail Modal -->
+    <div id="subjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto fade-in">
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-start justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800" id="modalTitle">Course Name</h2>
+                    <p class="text-sm text-gray-600 mt-1" id="modalSubtitle">Detailed attendance records</p>
+                </div>
+                <button onclick="closeSubjectModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <!-- Modal Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4">
+                        <div class="text-sm text-gray-600 mb-1">Overall Attendance</div>
+                        <div class="text-3xl font-bold text-indigo-600" id="modalOverall">71.0%</div>
+                        <div class="text-xs text-gray-600 mt-1" id="modalAttended">44 of 62 classes</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
+                        <div class="text-sm text-gray-600 mb-1">Classes Attended</div>
+                        <div class="text-3xl font-bold text-green-600" id="modalPresent">44</div>
+                        <div class="text-xs text-gray-600 mt-1">Present in classes</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                        <div class="text-sm text-gray-600 mb-1">Total Classes</div>
+                        <div class="text-3xl font-bold text-blue-600" id="modalTotal">62</div>
+                        <div class="text-xs text-gray-600 mt-1">Total conducted</div>
+                    </div>
+                </div>
+
+                <!-- Current View Statistics -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-bold text-gray-800 mb-3">
+                        <i class="fas fa-chart-line mr-2"></i>Current View Statistics
+                    </h3>
+                    <div class="grid grid-cols-4 gap-3 text-center">
+                        <div class="bg-white rounded p-2">
+                            <div class="text-lg font-bold text-green-600" id="statsPresent">10</div>
+                            <div class="text-xs text-gray-600">Present</div>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <div class="text-lg font-bold text-red-600" id="statsAbsent">5</div>
+                            <div class="text-xs text-gray-600">Absent</div>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <div class="text-lg font-bold text-blue-600" id="statsTotal">15</div>
+                            <div class="text-xs text-gray-600">Total Records</div>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <div class="text-lg font-bold text-purple-600" id="statsRate">66.7%</div>
+                            <div class="text-xs text-gray-600">Current Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="mb-4">
+                    <h3 class="font-bold text-gray-800 mb-3">
+                        <i class="fas fa-filter mr-2"></i>Filter Records
+                    </h3>
+                    <div class="flex gap-3 flex-wrap">
+                        <input type="date" id="filterFromDate" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="From Date">
+                        <input type="date" id="filterToDate" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="To Date">
+                        <select id="filterStatus" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">All Status</option>
+                            <option value="PRESENT">Present</option>
+                            <option value="ABSENT">Absent</option>
+                        </select>
+                        <button onclick="applyModalFilters()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                        <button onclick="clearModalFilters()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Records Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left p-3 font-semibold text-gray-700">Date</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Status</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Time Marked</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Teacher</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Semester</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Section</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalRecordsBody">
+                            <!-- Will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Calendar Day Popup -->
+    <div id="dayPopup" class="hidden fixed bg-white rounded-xl shadow-2xl z-50 p-4 max-w-md max-h-96 overflow-y-auto">
+        <button onclick="closeDayPopup()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">
+            <i class="fas fa-times"></i>
+        </button>
+        <div id="dayPopupContent">
+            <!-- Will be populated dynamically -->
+        </div>
+    </div>
+
+    <script src="portal.js?v=20251031"></script>
 </body>
 </html>
+

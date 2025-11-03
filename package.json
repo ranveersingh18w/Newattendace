@@ -1,18 +1,27 @@
 {
-  "name": "newattendance",
+  "name": "attendance-portal",
   "version": "1.0.0",
-  "description": "Techno NJR Attendance Portal - Secure student attendance tracking system",
-  "main": "app.js",
+  "description": "Student Attendance Portal with Real-time Dashboard",
+  "main": "server.js",
   "scripts": {
-    "start": "vercel dev"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "dependencies": {},
-  "devDependencies": {},
   "keywords": [
     "attendance",
     "student",
-    "portal"
+    "portal",
+    "dashboard"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase": "^12.5.0"
+  },
+  "engines": {
+    "node": "20.x"
+  }
 }
